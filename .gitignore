@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+output/
+.DS_Store
+archive/
+tmp/
+REDESIGN.md
+.env
+.env.*
+!.env.example

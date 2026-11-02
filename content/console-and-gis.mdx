@@ -1,0 +1,31 @@
+## Local inspection
+
+Open `http://localhost:8090` after starting the admin console. Inspect the pipeline stages, topology map, telemetry freshness, real feeds and residual flags. Operation previews show the command that will run; one operation is allowed at a time.
+
+The console holds the Docker socket. Keep its loopback binding, host validation and required POST header. The public project website does not relay administrative commands.
+
+## Public console roles
+
+The optional `public` Compose profile serves a separate console on port 8091 without the Docker socket. Anonymous readers view the twin. Demo users can try a limited safe relay list; other actions are simulated. Admin relay access requires separate configuration and credentials.
+
+```bash
+docker compose --profile public up -d console-public
+```
+
+This starts a local service; it does not by itself publish an internet demo. Do not label an unconfigured deployment as available.
+
+## Basemap privacy
+
+No basemap is drawn until configured or selected. Tile requests disclose the viewed area to the provider. Public Google tiles require explicit enablement; the repository also records an outstanding Google logo attribution limitation. Review provider requirements before using them publicly.
+
+## PostGIS direct
+
+Use a read-only `weave_reader` connection to the local database on port 5432. The console’s GIS clients tab supplies connection details and QGIS XML files. Consult `postgres/init/04_gis_reader.sql` for grants and session safeguards.
+
+The initialisation SQL runs only on an empty volume. For an older database, apply reviewed reader-role changes manually rather than recreating the volume.
+
+## OGC API Features
+
+The features service listens on `http://localhost:9000`. Its page limit must cover the requested layer. Since it does not emit a next-page link, a client may treat a truncated response as a complete layer. Prefer PostGIS direct for layers above the configured OGC page size.
+
+`asset.dma_status` joins DMA geometry to the latest state for thematic maps. A DMA’s synthetic boundary remains synthetic even when displayed alongside real pipes.

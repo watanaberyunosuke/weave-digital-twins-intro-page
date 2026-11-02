@@ -1,0 +1,36 @@
+## Real feed adapters
+
+Market and hydrometry pollers adapt API shapes. Endpoint URLs and region IDs come from `.env`. A new service with the same response shape may need only configuration; a different response structure needs an adapter change.
+
+Poll failures are logged and retried. Assess freshness against the configured polling interval and the publisher’s cadence, rather than calling every recent-looking value live.
+
+## Synthetic registries first
+
+```bash
+docker exec gis-loader python scripts/seed_synthetic_network.py --dmas 40 --meters-per-dma 25
+./scripts/register-connectors.sh
+```
+
+<Callout kind="warning" title="Data change">
+
+the seeder truncates DMA, water-meter and pressure-logger registries, derives replacements and writes generated Avro schemas. Registration deletes and recreates Datagen connectors. Generated schemas must exist before registration.
+
+</Callout>
+
+DMAs are derived from the same modelled-pipe selection used by the simulator. Meters sit on pipe geometry; schema ID options come from the newly created registries.
+
+## Kafka to Flink
+
+Topics use the pattern `domain.subject.raw.v1` with explicit retention. Flink source tables use JSON and start at the latest offsets. Starting a pipeline does not promise historical replay of earlier Kafka data.
+
+Source, sink and pipeline SQL must be sourced in order. The pipeline file executes one statement set, including passthrough telemetry and a 15-minute tumbling DMA balance. Its source-specific synthetic flags preserve provenance.
+
+## Storage observations
+
+The KiWIS storage adapter discovers series, filters locally to `STORAGE_BBOX`, retrieves values in batches and upserts daily means on `(ts, storage_name)` directly into Postgres. It links gauges to candidate storage assets with name, distance and capacity checks.
+
+A percent-full value requires a published asset capacity. Missing capacity is not a zero-percent storage observation.
+
+## Verify a pipeline
+
+Check connector state, the running Flink job and actual table timestamps together. A healthy broker alone does not establish successful ingestion. If a stage stalls, use [Operations](/docs/operations/) to narrow the failure boundary.
