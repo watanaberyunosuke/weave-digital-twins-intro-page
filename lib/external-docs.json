@@ -1,0 +1,16 @@
+{
+  "home": "https://harrybwatson.notion.site/Weave-documentation-40c6e7f930a481d3a1c5d397aa1a49b8",
+  "pages": {
+    "getting-started": "https://harrybwatson.notion.site/Getting-started-40c6e7f930a4818eb96be2f0ab7b673c",
+    "concepts": "https://harrybwatson.notion.site/Core-concepts-40c6e7f930a4811ea02ff6cdb988efbb",
+    "architecture": "https://harrybwatson.notion.site/Architecture-40c6e7f930a48133a68bc6b36f521378",
+    "configuration": "https://harrybwatson.notion.site/Configuration-40c6e7f930a4814998afe08434dfe08f",
+    "regions": "https://harrybwatson.notion.site/Configure-a-region-40c6e7f930a4814794efde6ec3ebeb85",
+    "telemetry": "https://harrybwatson.notion.site/Telemetry-pipelines-40c6e7f930a4814fb49ce14486feadfd",
+    "modelling": "https://harrybwatson.notion.site/Hydraulic-modelling-40c6e7f930a481cab6f9f0f6ceda6685",
+    "console-and-gis": "https://harrybwatson.notion.site/Console-GIS-40c6e7f930a4815495f5e9c805fd8722",
+    "operations": "https://harrybwatson.notion.site/Operations-troubleshooting-40c6e7f930a48128a68fd5e18450213c",
+    "api": "https://harrybwatson.notion.site/HTTP-API-reference-40c6e7f930a481e598f1c0c4e44cece9",
+    "contributing": "https://harrybwatson.notion.site/Contributing-40c6e7f930a481e09e71f5c78da089fc"
+  }
+}

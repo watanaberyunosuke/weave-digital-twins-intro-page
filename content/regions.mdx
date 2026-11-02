@@ -1,0 +1,37 @@
+## Start from the template
+
+Copy `gis/regions/TEMPLATE.yml` to your own file and set `GIS_REGION_CONFIG` in `.env`. Define the region label, source ID, extent and layers. Check each source’s licence, attribution and permitted use independently.
+
+Keep region-specific coordinates, agency names and identifiers in the region file and `.env`.
+
+## Supported source shapes
+
+A layer can use an ArcGIS item ID, a WFS 2.0 URL and type name, or an Overpass query. Optional source filters belong in the layer definition. The Overpass query defines its own area; the region extent is not applied to it.
+
+Use `attribute_hints` to resolve varying source fields through the loader’s `pick()` helper. Do not add hardcoded source column names to general loader logic.
+
+## Inspect a small load
+
+```bash
+docker exec gis-loader python gis/discover_layers.py --search reservoir
+docker exec gis-loader python gis/load_gis.py --layer water_main --limit 500
+```
+
+The layer name must match your configuration. Inspect loaded raw attributes and conformed geometry before a full load.
+
+## Build topology and elevation
+
+```bash
+docker exec gis-loader python gis/load_gis.py --all --build-topology
+docker exec gis-loader python gis/load_elevation.py
+```
+
+Topology snaps pipe endpoints to shared nodes using PostGIS. Existing nodes retain IDs across reruns. Changing snap tolerance needs a deliberate topology rebuild and assessment of downstream references.
+
+The DEM loader samples configured elevation tiles onto nodes without an elevation. Without a usable sample the model uses a default ground level; that is an assumption, not a measured elevation.
+
+## Supply and model selection
+
+The water model starts from recognised reservoirs and keeps connected supplied pipes. A mapped dam or tank is not automatically a valid fixed-head supply. Review facility classification and reservoir-to-node distance.
+
+No valid reservoir or no supplied pipe causes model building to stop with a diagnostic. See [Modelling](/docs/modelling/) before seeding and building a full network.

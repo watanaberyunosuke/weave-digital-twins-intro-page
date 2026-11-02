@@ -1,0 +1,40 @@
+## Start with the failing boundary
+
+```bash
+docker compose ps
+docker compose logs --tail=100 gis-loader simulator console
+```
+
+Check expected service health, then inspect the output of the incomplete stage. Redact endpoints, tokens and region details before sharing logs. A successful syntax check is not runtime verification.
+
+## Compose cannot find a base file
+
+Run `scripts/fetch-confluent-stack.sh` from the twin repository. The base file is git-ignored and is required alongside the override. Check that Docker can read the active bind-mount directory, especially when a source checkout is held in cloud-synchronised storage.
+
+## No synthetic telemetry
+
+Confirm topics exist, seeding completed, `schemas/*.avsc` was generated, and Datagen connectors are running. Then check that the Flink statement set is running and that sink timestamps advance. Avoid starting a second statement set.
+
+## No model or residual
+
+Review reservoir classification, snap distance, topology node references and supplied connectivity. Build the network after topology changes. Confirm readings exist before expecting non-zero demand. A fresh baseline remains UNKNOWN until enough prior residuals exist.
+
+## ELK is empty
+
+```bash
+./scripts/elk-up.sh
+```
+
+Use this supported entry point to select local or external ELK. It probes from the intended container network. Authentication and certificate failures require correction. Logstash resets saved positions when its target changes so the new cluster receives the bounded backfill.
+
+Check Postgres first: Elasticsearch is only a derived copy. Its retention does not describe the full Postgres history.
+
+## Preserve the database
+
+Do not run `docker compose down -v` as routine troubleshooting: it can destroy the loaded database and other volumes. Postgres initialisation scripts run only on a fresh volume. Use a reviewed manual migration for an existing database, backed by an appropriate backup and rollback plan.
+
+Restarting or rebuilding containers does not apply every SQL schema change. Check the database itself before declaring a migration complete.
+
+## Verification checklist
+
+Confirm service health, connector state, a single intended Flink pipeline, advancing observation timestamps, the latest solve and baseline sample count. Report stale, unavailable and insufficient-history states explicitly.

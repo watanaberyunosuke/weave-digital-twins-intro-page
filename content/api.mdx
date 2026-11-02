@@ -1,0 +1,44 @@
+## Scope
+
+The twin exposes an existing FastAPI console API. This website does not host or proxy it. The routes below are a source-level guide, not a claim that an endpoint is currently reachable. Inspect the linked implementation for exact response fields and active role checks.
+
+## Read interfaces
+
+| Route                                | Purpose                            |
+| ------------------------------------ | ---------------------------------- |
+| `GET /api/status`                    | Derived pipeline and service state |
+| `GET /api/config`                    | Console configuration              |
+| `GET /api/freshness`                 | Telemetry freshness information    |
+| `GET /api/feeds`                     | Feed information                   |
+| `GET /api/anomalies`                 | Flagged residuals                  |
+| `GET /api/geo/pipes`                 | Pipe map features                  |
+| `GET /api/geo/dmas`                  | DMA map features                   |
+| `GET /api/geo/facilities`            | Facility map features              |
+| `GET /api/geo/gauges`                | Hydrometry map features            |
+| `GET /api/geo/storages`              | Storage map features               |
+| `GET /api/geo/meters`                | Meter map features                 |
+| `GET /api/dma/{dma_id}`              | DMA detail                         |
+| `GET /api/device/{kind}/{device_id}` | Device detail                      |
+| `GET /api/storage/{station_no}`      | Storage history                    |
+
+Geospatial endpoints can apply source-defined bounds, limits or role filtering. Do not treat a map response as an exhaustive export without checking the contract.
+
+## Session and operations
+
+`GET /api/session`, `POST /api/login` and `POST /api/logout` manage console sessions. Password hashes, signed cookies and optional TOTP belong to the console deployment, not this site.
+
+`GET /api/actions` lists actions. `POST /api/actions/{action}/preview` builds a preview; `POST /api/actions/{action}` starts the allowed operation. Job state is exposed under `/api/jobs` and `/api/jobs/{jid}`. Operations require the console’s host, role and request-header protections.
+
+Relay endpoints under `/api/relay/` use separate demo and admin token boundaries. They are internal integration surfaces, not public website endpoints. Do not put relay tokens into frontend code.
+
+## GIS interfaces
+
+The console provides admin-protected GIS connection exports. The separate features service exposes OGC API Features on port 9000. Read-only PostGIS access is also available; see [Console and GIS](/docs/console-and-gis/).
+
+## Example local read
+
+```bash
+curl --fail http://localhost:8090/api/status
+```
+
+Run this only against your own configured local service. A returned status response must be interpreted with its component state and timestamps, rather than assumed to mean every downstream stage is healthy.

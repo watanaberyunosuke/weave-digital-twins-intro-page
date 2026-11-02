@@ -1,0 +1,27 @@
+## A physical foundation
+
+Weave uses public GIS geometry for network assets. It derives graph nodes from pipe endpoints. Real source geometry can still be incomplete, disconnected or inaccurate; “real” describes provenance, not an assurance of engineering quality.
+
+## Three kinds of information
+
+| Category  | Examples                                        | Interpretation                                                 |
+| --------- | ----------------------------------------------- | -------------------------------------------------------------- |
+| Real      | Public pipes, facilities and gauge observations | Published source data, subject to source quality and licensing |
+| Synthetic | Derived DMAs, meters and generated readings     | Generated test data anchored to real geometry                  |
+| Modelled  | EPANET pressure and flow results                | A calculation under configured assumptions                     |
+
+Telemetry messages and tables carry `is_synthetic`; real and synthetic telemetry is stored separately. Registry objects use a synthetic flag. A graph drawn over real geography does not make generated readings real.
+
+## Zones and registries
+
+A District Metered Area (DMA) groups pipes for analysis. Here, these zones are synthetic clusters, not verified operational boundaries. The seeder places meters along real pipe geometry and builds schemas from the resulting registry IDs. Generated readings therefore refer to existing objects.
+
+## Database organisation
+
+`asset` holds topology and derived DMAs. `ref` holds device and gauge registries. `twin` holds telemetry, model output and residuals. Postgres remains the system of record; Elasticsearch is a disposable inspection copy.
+
+## What an anomaly means
+
+A pressure residual is modelled pressure minus observed pressure. The classifier checks how far that residual has moved from the DMA’s own baseline. A flag is an investigation cue. Synthetic observations cannot establish real-world detection accuracy.
+
+Continue with [Modelling](/docs/modelling/) for the scoring method and its limitations.

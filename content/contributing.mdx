@@ -1,0 +1,31 @@
+## Work in the right repository
+
+The project website and the utility twin are separate directories. Website changes use the Node commands in the website README. The checks below apply to the Python and container-based twin repository.
+
+Read the repository’s current agent and contributor guidance. Use a meaningful issue branch of the form `type/hdh-number-description` when work is tracked in Linear. Preserve the configured repository-owner authorship and omit tool attribution.
+
+## Syntax and unit checks
+
+```bash
+python3 -m py_compile gis/*.py ingest/*.py scripts/seed_synthetic_network.py model/*.py console/*.py
+python3 -m unittest discover -s model -p 'test_*.py'
+python3 -m unittest discover -s console -p 'test_*.py'
+bash -n scripts/*.sh
+node --check console/static/app.js
+```
+
+Some tests skip without component dependencies. CI installs each component’s locked requirements and explicitly imports WNTR so a broken solver dependency cannot hide behind a skip. GIS integration tests use a PostGIS database; do not run them against a production database.
+
+## Dependency changes
+
+Edit `requirements.in` and regenerate the hash-locked `requirements.txt` using `scripts/lock-requirements.sh`. Do not hand-edit the lock. Images and CI use `--require-hashes`; the Locks check detects disagreement between input and output.
+
+## Preserve project contracts
+
+Keep region identifiers in configuration, synthetic provenance explicit, and public ports on loopback. Add model or ingest tests to the appropriate CI component. Keep operation commands aligned with the scripts used by the console.
+
+A new twin table may require schema migration, Flink sink changes, provenance fields and an ELK input with a stable natural-key document ID. Review all consumers rather than only adding one writer.
+
+## Describe the evidence
+
+Report what changed, which checks executed, which skipped and whether runtime behaviour was exercised. Do not claim a live deployment from passing syntax tests or a merged pull request.

@@ -1,0 +1,69 @@
+## Before you start
+
+Install Docker with Compose 2.24.4 or later, Git and a shell. The services run in containers; the twin has no local application build. Allocate resources for Kafka, Flink, Postgres and the model, and begin with a limited GIS load when evaluating a large network.
+
+The website and the twin are separate projects. These commands belong in the **weave-digital-twins repository**, not the website directory. Published service ports bind to loopback.
+
+## Prepare the repository
+
+```bash
+git clone https://github.com/watanaberyunosuke/weave-digital-twins.git
+cd weave-digital-twins
+./scripts/fetch-confluent-stack.sh
+cp .env.example .env
+```
+
+Edit `.env` for your region and review its GIS source configuration before starting. The fetch script supplies the git-ignored base Compose file; the override cannot run by itself.
+
+```bash
+./scripts/init-secrets.sh
+./scripts/download-flink-connectors.sh
+```
+
+The secrets script fills blank console secrets and asks for an admin password. Do not publish `.env` or paste its tokens into support requests.
+
+## Start services
+
+```bash
+docker compose up -d broker connect control-center flink-jobmanager \
+  flink-taskmanager flink-sql-client postgres ingest-market \
+  ingest-hydrometry ingest-storage gis-loader simulator console featureserv
+```
+
+Check `docker compose ps` and wait for dependencies to become healthy. A running container alone does not establish a working data pipeline.
+
+## Bootstrap the twin
+
+```bash
+./scripts/bootstrap.sh
+```
+
+Bootstrap creates topics, loads GIS and topology, samples elevation, seeds synthetic registries, registers generators, builds the model and starts the ELK read copy. A full region can take time.
+
+<Callout kind="warning" title="Data change">
+
+seeding truncates the synthetic DMA, water-meter and pressure-logger registries and regenerates schemas. Connector registration deletes and recreates its Datagen connectors. Review the region and existing data before rerunning bootstrap.
+
+</Callout>
+
+## Start stream processing
+
+```bash
+docker exec -it flink-sql-client sql-client.sh
+```
+
+Inside the SQL client, run these in order:
+
+```sql
+SOURCE '/sql/01_sources.sql';
+SOURCE '/sql/02_sinks.sql';
+SOURCE '/sql/03_pipelines.sql';
+```
+
+Start one statement set only. Duplicate jobs can write duplicate telemetry; the telemetry hypertables do not deduplicate those writes.
+
+## Verify the result
+
+Open the local console at `http://localhost:8090`. Check topics, connector state, Flink jobs, row counts and telemetry timestamps. Then inspect the network and latest model residual. The first model status can be UNKNOWN while a baseline is accumulating.
+
+Kafka is managed in Control Center on port 9021; Flink jobs are managed in the Flink UI on 9081. See [Operations](/docs/operations/) if a stage is incomplete.

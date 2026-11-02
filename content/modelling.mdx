@@ -1,0 +1,47 @@
+## Build topology, then apply demands
+
+```bash
+docker exec simulator python run_sim.py --build
+docker exec simulator python run_sim.py --once
+```
+
+The build creates `network.inp` from PostGIS. It walks supplied components outward from reservoir nodes in deterministic order, keeping pipes within `SIM_MAX_PIPES`. Reservoirs beyond `SIM_MAX_SNAP_M` are excluded.
+
+At each solve, demands are calculated from the last hour’s synthetic water-meter readings: average each meter first, then sum at its nearest node. Junction demands are reset before applying the current values. Silent meters add no demand and are counted in the log.
+
+## Assumptions and limitations
+
+Missing geometry attributes require defaults, including diameter, roughness or ground level. Reservoir head is snapped ground level plus configured reservoir depth. The DEM loader improves elevation coverage but does not calibrate the hydraulic model.
+
+The implemented solver is EPANET via WNTR. Electricity and transport schemas do not establish implemented simulation for those domains. Synthetic pressures and demands demonstrate processing, not validated field detection.
+
+## Residual method
+
+Pressure residual is **modelled minus observed pressure**, aggregated by DMA. The classifier compares the current residual with the mean and standard deviation of earlier residuals in that DMA’s baseline.
+
+| Setting                      | Default in model source | Interpretation                               |
+| ---------------------------- | ----------------------- | -------------------------------------------- |
+| `SIM_RESIDUAL_BASELINE_DAYS` | 7                       | Baseline window in days                      |
+| `SIM_RESIDUAL_MIN_SAMPLES`   | 8                       | Fewer samples produces UNKNOWN               |
+| `SIM_RESIDUAL_Z_WATCH`       | 2                       | Absolute z-score WATCH threshold             |
+| `SIM_RESIDUAL_Z_LEAK`        | 3                       | Absolute z-score SUSPECTED_LEAK threshold    |
+| `SIM_RESIDUAL_SIGMA_FLOOR_M` | 0.1                     | Minimum baseline spread in metres            |
+| `SIM_RESIDUAL_RELEARN_HOURS` | 24                      | Delay before flagged samples rejoin baseline |
+
+<Callout title="Interpret the score">
+
+These are method parameters, not measured performance results. Report a score with its baseline count; UNKNOWN is insufficient evidence, not OK.
+
+</Callout>
+
+## Reset after recalibration
+
+```bash
+docker exec simulator python run_sim.py --reset-baseline
+```
+
+Add `--dma ID` to scope a reset. This changes which history counts from now onward; it does not delete old residuals. A lasting change may be learned after the relearning period, so a cleared flag alone does not prove a physical issue was repaired.
+
+## Result retention
+
+Only the latest run is read for current per-element output. Historical `twin.sim_result` rows are pruned according to `SIM_RESULT_RETENTION_HOURS`. Residual history and per-element result history serve different purposes.
