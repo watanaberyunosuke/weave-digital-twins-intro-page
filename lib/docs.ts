@@ -1,3 +1,4 @@
+import generated from "@/lib/notion-content.generated.json";
 import DocGettingStarted from "@/content/getting-started.mdx";
 import DocConcepts from "@/content/concepts.mdx";
 import DocArchitecture from "@/content/architecture.mdx";
@@ -10,7 +11,7 @@ import DocOperations from "@/content/operations.mdx";
 import DocApi from "@/content/api.mdx";
 import DocContributing from "@/content/contributing.mdx";
 
-export const docs = [
+const repositoryDocs = [
   {
     slug: "getting-started",
     title: "Getting started",
@@ -227,5 +228,16 @@ export const docs = [
     Component: DocContributing,
   },
 ];
+type NotionPage = {
+  markdown: string;
+  headings: { title: string; id: string }[];
+  searchText: string;
+};
+const synced = generated as Record<string, NotionPage>;
+export const docs = repositoryDocs.map((doc) => ({
+  ...doc,
+  ...(synced[doc.slug] || {}),
+  notionMarkdown: synced[doc.slug]?.markdown,
+}));
 export const repository =
   "https://github.com/watanaberyunosuke/weave-digital-twins";

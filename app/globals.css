@@ -1,4 +1,6 @@
 :root {
+  --header-h: 64px;
+  --header-pad: 32px;
   --bg: #f5f6f8;
   --panel: #ffffff;
   --panel-2: #f0f2f5;
@@ -24,6 +26,7 @@
   --ink: var(--text);
   --button: #1f6feb;
   --button-ink: #ffffff;
+  --mark-ink: #124c62;
   --map: var(--map-bg);
   --amber: var(--watch);
   --blue: var(--real);
@@ -56,6 +59,7 @@
   --ink: var(--text);
   --button: #1f6feb;
   --button-ink: #ffffff;
+  --mark-ink: #e3e8ef;
   --map: var(--map-bg);
   --amber: var(--watch);
   --blue: var(--real);
@@ -89,6 +93,7 @@
     --ink: var(--text);
     --button: #1f6feb;
     --button-ink: #ffffff;
+    --mark-ink: #e3e8ef;
     --map: var(--map-bg);
     --amber: var(--watch);
     --blue: var(--real);
@@ -180,10 +185,10 @@ h3 {
   background: var(--bg);
 }
 .header-inner {
-  max-width: 1440px;
-  padding: 0 36px;
+  max-width: 1600px;
+  padding: 0 var(--header-pad);
   margin: auto;
-  height: 82px;
+  height: var(--header-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -673,8 +678,8 @@ h3 {
   padding: 35px 23px 35px 32px;
   border-right: 1px solid var(--line);
   position: sticky;
-  top: 82px;
-  height: calc(100dvh - 82px);
+  top: var(--header-h);
+  height: calc(100dvh - var(--header-h));
   overflow: auto;
   font-size: 12px;
 }
@@ -753,8 +758,8 @@ h3 {
 .page-toc {
   padding: 43px 25px 30px 5px;
   position: sticky;
-  top: 82px;
-  max-height: calc(100dvh - 82px);
+  top: var(--header-h);
+  max-height: calc(100dvh - var(--header-h));
   overflow: auto;
   align-self: start;
 }
@@ -1101,9 +1106,6 @@ h3 {
     flex-wrap: wrap;
     gap: 17px;
   }
-  .header-inner {
-    padding-inline: 26px;
-  }
   .docs-shell {
     grid-template-columns: 215px minmax(0, 1fr);
   }
@@ -1133,10 +1135,6 @@ h3 {
 @media (max-width: 850px) {
   .container {
     width: calc(100% - 48px);
-  }
-  .header-inner {
-    height: 70px;
-    padding-inline: 24px;
   }
   .site-header nav {
     gap: 16px;
@@ -1220,8 +1218,8 @@ h3 {
     grid-template-columns: 190px minmax(0, 1fr);
   }
   .docs-sidebar {
-    top: 70px;
-    height: calc(100dvh - 70px);
+    top: var(--header-h);
+    height: calc(100dvh - var(--header-h));
     padding-left: 23px;
     padding-right: 15px;
   }
@@ -1245,7 +1243,6 @@ h3 {
 }
 @media (max-width: 600px) {
   .header-inner {
-    padding-inline: 18px;
     gap: 15px;
   }
   .brand {
@@ -1513,13 +1510,7 @@ h3 {
   background: var(--bg);
   color: var(--ink);
 }
-.docs-header .header-inner {
-  height: 64px;
-  max-width: 1600px;
-  padding-inline: 32px;
-  gap: 32px;
-}
-.docs-header .brand {
+.site-header .brand {
   min-width: 208px;
   font-size: 24px;
 }
@@ -1528,10 +1519,6 @@ h3 {
   display: none;
 }
 .site-header > .header-inner > .search-trigger {
-  margin-left: auto;
-}
-.docs-header > .header-inner > .search-trigger {
-  margin-left: 0;
   margin-right: auto;
   background: var(--surface);
   padding: 9px 13px;
@@ -1551,8 +1538,8 @@ h3 {
   grid-template-columns: 272px minmax(0, 1fr) 240px;
 }
 .docs-sidebar {
-  top: 64px;
-  height: calc(100dvh - 64px);
+  top: var(--header-h);
+  height: calc(100dvh - var(--header-h));
   padding: 34px 30px;
   background: var(--surface);
   border-color: transparent;
@@ -1770,8 +1757,8 @@ h3 {
   border-color: #554625;
 }
 .page-toc {
-  top: 64px;
-  max-height: calc(100dvh - 64px);
+  top: var(--header-h);
+  max-height: calc(100dvh - var(--header-h));
   padding: 48px 27px 30px 12px;
 }
 .page-toc > .eyebrow {
@@ -1852,7 +1839,7 @@ h3 {
   .docs-shell {
     grid-template-columns: 240px minmax(0, 1fr);
   }
-  .docs-header .brand {
+  .site-header .brand {
     min-width: 176px;
   }
   .page-toc {
@@ -1892,14 +1879,16 @@ h3 {
   }
 }
 @media (max-width: 960px) {
-  .docs-header .header-inner {
-    padding-inline: 24px;
+  :root {
+    --header-pad: 24px;
+  }
+  .header-inner {
     gap: 20px;
   }
-  .docs-header .brand {
+  .site-header .brand {
     min-width: 0;
   }
-  .docs-header .overview-link,
+  .site-header .overview-link,
   .notion-link {
     display: none;
   }
@@ -1923,9 +1912,10 @@ h3 {
   }
 }
 @media (max-width: 767px) {
-  .docs-header .header-inner {
-    height: 64px;
-    padding-inline: 19px;
+  :root {
+    --header-pad: 20px;
+  }
+  .header-inner {
     gap: 14px;
   }
   .docs-shell {
@@ -1937,7 +1927,7 @@ h3 {
   .mobile-docs {
     display: block;
     position: sticky;
-    top: 64px;
+    top: var(--header-h);
     z-index: 15;
     border-bottom: 1px solid var(--line);
     background: var(--bg);
@@ -1992,16 +1982,13 @@ h3 {
   .docs-index h1 {
     font-size: 33px;
   }
-  .docs-header nav {
+  .site-header nav {
     gap: 14px;
   }
-  .docs-header .search-trigger {
+  .site-header .search-trigger {
     font-size: 10px;
     gap: 0;
     padding: 8px;
-  }
-  .docs-header .brand svg {
-    display: none;
   }
   .header-inner {
     gap: 14px;
@@ -2022,17 +2009,16 @@ h3 {
   }
 }
 @media (max-width: 380px) {
-  .docs-header .header-inner {
+  :root {
+    --header-pad: 16px;
+  }
+  .header-inner {
     gap: 10px;
-    padding-inline: 15px;
   }
-  .docs-header nav {
+  .site-header nav {
     gap: 10px;
   }
-  .docs-header .brand {
-    font-size: 23px;
-  }
-  .docs-header .search-trigger {
+  .site-header .search-trigger {
     padding: 7px;
   }
   .doc-meta > span {
@@ -2120,16 +2106,6 @@ body {
 }
 .brand strong {
   font-weight: 700;
-}
-.brand > .logo {
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  align-self: center;
-  flex: none;
-  display: inline-block;
-  margin: 0;
-  background: linear-gradient(135deg, var(--real) 0 50%, var(--syn) 50% 100%);
 }
 .brand > .brand-context {
   margin: 0;
@@ -2268,28 +2244,21 @@ body {
     color: var(--shiki-light) !important;
   }
 }
-/* A single flat mark inherits the wordmark colour in either appearance. */
+/* The mark is drawn in the brand ink; the wordmark beside it stays `text`. */
 .brand > .logo,
 .docs-header .brand > .logo {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
+  flex: none;
   display: block;
   align-self: center;
-  background: none;
-  border-radius: 0;
-  stroke: none;
+  margin: 0;
+  color: var(--mark-ink);
 }
 @media (min-width: 768px) {
   .site-header .brand > .brand-context {
     display: inline;
   }
-}
-/* Preserve the approved meter's horizontal pipe-to-dial proportions. */
-.brand > .logo,
-.docs-header .brand > .logo {
-  width: 25px;
-  height: 28px;
-  flex: none;
 }
 
 .theme-picker {

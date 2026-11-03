@@ -1,3 +1,4 @@
+import { NotionContent } from "@/components/notion-content";
 import { DocsOutline } from "@/components/docs-outline";
 import { notionDocumentationUrl } from "@/components/docs-link";
 import { notFound } from "next/navigation";
@@ -55,11 +56,18 @@ export default async function DocPage({
           <DocsOutline headings={doc.headings} />
         </details>
         <article className="prose">
-          <Content />
+          {doc.notionMarkdown ? (
+            <NotionContent markdown={doc.notionMarkdown} />
+          ) : (
+            <Content />
+          )}
         </article>
         <div className="doc-source-note">
-          Source-checked 2 November 2026. Commands describe the twin repository;
-          runtime availability has not been assessed by this website.
+          {doc.notionMarkdown
+            ? "Fetched from Notion at build time."
+            : "Repository documentation snapshot, source-checked 2 November 2026."}{" "}
+          Commands describe the twin repository; runtime availability has not
+          been assessed by this website.
         </div>
         <nav className="page-pagination" aria-label="Documentation pages">
           {index > 0 ? (

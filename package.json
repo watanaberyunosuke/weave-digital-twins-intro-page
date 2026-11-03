@@ -6,7 +6,8 @@
     "dev": "next dev --hostname 127.0.0.1",
     "build": "next build",
     "typecheck": "tsc --noEmit",
-    "serve": "python3 -m http.server 8080 --bind 127.0.0.1 --directory out"
+    "serve": "python3 -m http.server 8080 --bind 127.0.0.1 --directory out",
+    "prebuild": "node scripts/sync-notion.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
@@ -15,7 +16,11 @@
     "next": "16.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "remark-gfm": "^4.0.1"
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.2.0"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
