@@ -60,4 +60,4 @@ Technical content was checked against the twin repository on 2 November 2026. It
 
 ## Brand
 
-The website and documentation share the console’s exact light/dark palette and system font family. The logo uses an outlined water droplet and flowing line in a restrained monoline style. Its body follows the wordmark text colour in light and dark appearances, with no gradients, shadows or dimensional effects. `components/brand.tsx` supplies the shared wordmark; `public/weave-mark.svg` is the standalone vector and `app/icon.svg` is the matching favicon. The running console is unchanged.
+The website and documentation share the console’s exact light/dark palette and system font family. The logo is a closed monoline droplet with a level tide line running through it, drawn on a 24-unit grid at stroke 1.8 in the brand ink (`--mark-ink`: #124c62 light, #e3e8ef dark), with no gradients, shadows or dimensional effects. The mark and tokens follow the Weave design system. `components/brand.tsx` supplies the shared wordmark; `public/weave-mark.svg` is the standalone vector and `app/icon.svg` is the matching favicon. The running console is unchanged.
