@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Brand } from "@/components/brand";
 import { usePathname } from "next/navigation";
 import { ThemePicker, Search } from "@/components/controls";
-import links from "@/lib/external-docs.json";
 type SearchPage = {
   slug: string;
   title: string;
@@ -30,14 +29,6 @@ export function SiteHeader({ pages }: { pages: SearchPage[] }) {
           >
             Docs
           </Link>
-          <a
-            className="notion-link"
-            href={links.home}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Notion ↗<span className="sr-only"> (opens in a new tab)</span>
-          </a>
           <a
             className="github-link"
             href="https://github.com/watanaberyunosuke/weave-digital-twins"

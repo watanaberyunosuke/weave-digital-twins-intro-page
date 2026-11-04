@@ -1527,10 +1527,6 @@ h3 {
   color: var(--accent);
   font-weight: 600;
 }
-.notion-link {
-  font-size: 11px;
-  color: var(--muted);
-}
 .docs-shell {
   background: var(--bg);
   color: var(--ink);
@@ -1888,8 +1884,7 @@ h3 {
   .site-header .brand {
     min-width: 0;
   }
-  .site-header .overview-link,
-  .notion-link {
+  .site-header .overview-link {
     display: none;
   }
   .docs-shell {
