@@ -4,6 +4,56 @@ import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import { visit } from "unist-util-visit";
 
+const entities = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+};
+const decode = (text) =>
+  text.replace(/&(?:amp|lt|gt|quot|#39);/g, (e) => entities[e]);
+const code = (text) => {
+  const body = decode(text);
+  // A body with a backtick needs a longer fence and padding so it can't close early.
+  return body.includes("`") ? `\`\` ${body} \`\`` : `\`${body}\``;
+};
+const date = (iso) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-AU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
+// Notion's markdown keeps some formatting as inline tags. These have exact
+// Markdown equivalents, so they are rewritten rather than refused; anything
+// else (callouts, columns, toggles) still fails the build below. Fenced code
+// is left alone, because a tag there is text the guide is showing.
+export function inlineNotionTags(markdown) {
+  return markdown
+    .split(/(^```[^\n]*\n[\s\S]*?^```[ \t]*$)/m)
+    .map((part, i) =>
+      i % 2
+        ? part
+        : part
+            .replace(/<code>([\s\S]*?)<\/code>/g, (_, t) => code(t))
+            .replace(/<(b|strong)>([\s\S]*?)<\/\1>/g, "**$2**")
+            .replace(/<(i|em)>([\s\S]*?)<\/\1>/g, "*$2*")
+            .replace(/<s>([\s\S]*?)<\/s>/g, "~~$1~~")
+            .replace(/<u>([\s\S]*?)<\/u>/g, "$1")
+            .replace(
+              /<mention(?:-page)?\s+url="([^"]+)"\s*>([\s\S]*?)<\/mention(?:-page)?>/g,
+              "[$2]($1)",
+            )
+            .replace(/<mention(?:-page)?\s+url="([^"]+)"\s*\/>/g, "[$1]($1)")
+            .replace(/<date\s+start="(\d{4}-\d{2}-\d{2})"[^>]*\/>/g, (_, d) =>
+              date(d),
+            ),
+    )
+    .join("");
+}
+
 const token = process.env.NOTION_ACCESS_TOKEN;
 // Production builds must publish Notion, the source of the guides, so a missing
 // token or a failed fetch fails the deploy and the last good one stays live.
@@ -67,7 +117,7 @@ if (!token) {
       throw new Error(
         `Notion returned incomplete content for ${slug}; refusing to publish.`,
       );
-    let markdown = data.markdown;
+    let markdown = inlineNotionTags(data.markdown);
     // Preserve links to our own guides as links inside the website.
     markdown = markdown.replace(
       /\[([^\]]+)\]\((https:\/\/[^)]+)\)/g,
@@ -98,13 +148,13 @@ if (!token) {
       headings.push({ title, id: anchor });
     });
     // HTML and Notion-specific XML need explicit support before they can be shown safely.
-    let unsupported = false;
-    visit(tree, "html", () => {
-      unsupported = true;
+    const unsupported = [];
+    visit(tree, "html", (node) => {
+      unsupported.push(node.value.slice(0, 60).replace(/\s+/g, " "));
     });
-    if (unsupported)
+    if (unsupported.length)
       throw new Error(
-        `Unsupported Notion markup in ${slug}; refusing to drop content.`,
+        `Unsupported Notion markup in ${slug}; refusing to drop content: ${unsupported.slice(0, 3).join(" | ")}`,
       );
     result[slug] = { markdown, headings, searchText: markdown };
     console.log(`Fetched Notion guide: ${slug}`);
