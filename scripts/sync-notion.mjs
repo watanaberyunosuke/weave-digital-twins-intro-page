@@ -26,6 +26,32 @@ const date = (iso) =>
     timeZone: "UTC",
   });
 
+// Notion writes simple tables as HTML. The first row becomes the header,
+// because a Markdown table must have one.
+const cells = (row) =>
+  [...row.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/g)].map((c) =>
+    c[1]
+      .trim()
+      .replace(/\s*\n\s*/g, " ")
+      .replace(/\|/g, "\\|"),
+  );
+const table = (all, body) => {
+  const rows = [...body.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((r) =>
+    cells(r[1]),
+  );
+  if (!rows.length) return all;
+  const width = Math.max(...rows.map((r) => r.length));
+  const line = (r) =>
+    `| ${[...r, ...Array(width - r.length).fill("")].join(" | ")} |`;
+  return [
+    "",
+    line(rows[0]),
+    line(Array(width).fill("---")),
+    ...rows.slice(1).map(line),
+    "",
+  ].join("\n");
+};
+
 // Notion's markdown keeps some formatting as inline tags. These have exact
 // Markdown equivalents, so they are rewritten rather than refused; anything
 // else (callouts, columns, toggles) still fails the build below. Fenced code
@@ -51,7 +77,8 @@ export function inlineNotionTags(markdown) {
               /<(?:mention-)?date\s+start="(\d{4}-\d{2}-\d{2})"(?:\s+end="(\d{4}-\d{2}-\d{2})")?[^>]*\/>/g,
               (_, start, end) =>
                 end ? `${date(start)} to ${date(end)}` : date(start),
-            ),
+            )
+            .replace(/<table[^>]*>([\s\S]*?)<\/table>/g, table),
     )
     .join("");
 }
@@ -92,75 +119,85 @@ if (!token) {
   if (Object.keys(ids).length !== pages.length || ids.undefined)
     throw new Error("Invalid or duplicate Notion page IDs.");
   const result = {};
+  // Every guide is checked before failing, so one build reports every problem.
+  const problems = [];
   for (const [slug, url] of pages) {
-    const id = url.match(/([0-9a-f]{32})$/i)[1];
-    const response = await fetch(
-      `https://api.notion.com/v1/pages/${id}/markdown`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Notion-Version": "2026-03-11",
+    try {
+      const id = url.match(/([0-9a-f]{32})$/i)[1];
+      const response = await fetch(
+        `https://api.notion.com/v1/pages/${id}/markdown`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Notion-Version": "2026-03-11",
+          },
+          signal: AbortSignal.timeout(30000),
         },
-        signal: AbortSignal.timeout(30000),
-      },
-    );
-    if (!response.ok)
-      throw new Error(
-        `Notion fetch failed for ${slug}: HTTP ${response.status}.`,
       );
-    const data = await response.json();
-    if (
-      typeof data.markdown !== "string" ||
-      !data.markdown.trim() ||
-      data.truncated ||
-      data.unknown_block_ids?.length ||
-      data.warnings?.length
-    )
-      throw new Error(
-        `Notion returned incomplete content for ${slug}; refusing to publish.`,
+      if (!response.ok)
+        throw new Error(
+          `Notion fetch failed for ${slug}: HTTP ${response.status}.`,
+        );
+      const data = await response.json();
+      if (
+        typeof data.markdown !== "string" ||
+        !data.markdown.trim() ||
+        data.truncated ||
+        data.unknown_block_ids?.length ||
+        data.warnings?.length
+      )
+        throw new Error(
+          `Notion returned incomplete content for ${slug}; refusing to publish.`,
+        );
+      let markdown = inlineNotionTags(data.markdown);
+      // Preserve links to our own guides as links inside the website.
+      markdown = markdown.replace(
+        /\[([^\]]+)\]\((https:\/\/[^)]+)\)/g,
+        (all, label, href) => {
+          const pageId = href.match(/([0-9a-f]{32})(?:\?|#|$)/i)?.[1];
+          return pageId && ids[pageId]
+            ? `[${label}](/docs/${ids[pageId]}/)`
+            : all;
+        },
       );
-    let markdown = inlineNotionTags(data.markdown);
-    // Preserve links to our own guides as links inside the website.
-    markdown = markdown.replace(
-      /\[([^\]]+)\]\((https:\/\/[^)]+)\)/g,
-      (all, label, href) => {
-        const pageId = href.match(/([0-9a-f]{32})(?:\?|#|$)/i)?.[1];
-        return pageId && ids[pageId]
-          ? `[${label}](/docs/${ids[pageId]}/)`
-          : all;
-      },
-    );
-    const tree = unified().use(remarkParse).use(remarkGfm).parse(markdown);
-    const headings = [];
-    const seen = new Set();
-    visit(tree, "heading", (node) => {
-      if (node.depth !== 2) return;
-      let title = "";
-      visit(node, (child) => {
-        if (child.type === "text" || child.type === "inlineCode")
-          title += child.value;
+      const tree = unified().use(remarkParse).use(remarkGfm).parse(markdown);
+      const headings = [];
+      const seen = new Set();
+      visit(tree, "heading", (node) => {
+        if (node.depth !== 2) return;
+        let title = "";
+        visit(node, (child) => {
+          if (child.type === "text" || child.type === "inlineCode")
+            title += child.value;
+        });
+        const anchor = title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+        if (!anchor || seen.has(anchor))
+          throw new Error(`Invalid or duplicate heading in ${slug}: ${title}`);
+        seen.add(anchor);
+        headings.push({ title, id: anchor });
       });
-      const anchor = title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
-      if (!anchor || seen.has(anchor))
-        throw new Error(`Invalid or duplicate heading in ${slug}: ${title}`);
-      seen.add(anchor);
-      headings.push({ title, id: anchor });
-    });
-    // HTML and Notion-specific XML need explicit support before they can be shown safely.
-    const unsupported = [];
-    visit(tree, "html", (node) => {
-      unsupported.push(node.value.slice(0, 60).replace(/\s+/g, " "));
-    });
-    if (unsupported.length)
-      throw new Error(
-        `Unsupported Notion markup in ${slug}; refusing to drop content: ${unsupported.slice(0, 3).join(" | ")}`,
-      );
-    result[slug] = { markdown, headings, searchText: markdown };
-    console.log(`Fetched Notion guide: ${slug}`);
+      // HTML and Notion-specific XML need explicit support before they can be shown safely.
+      const unsupported = [];
+      visit(tree, "html", (node) => {
+        unsupported.push(node.value.slice(0, 60).replace(/\s+/g, " "));
+      });
+      if (unsupported.length)
+        throw new Error(
+          `Unsupported Notion markup in ${slug}; refusing to drop content: ${unsupported.slice(0, 3).join(" | ")}`,
+        );
+      result[slug] = { markdown, headings, searchText: markdown };
+      console.log(`Fetched Notion guide: ${slug}`);
+    } catch (error) {
+      problems.push(error.message);
+    }
   }
+  if (problems.length)
+    throw new Error(
+      `Notion sync failed for ${problems.length} of ${pages.length} guides:\n- ${problems.join("\n- ")}`,
+    );
   await writeFile(destination, JSON.stringify(result, null, 2) + "\n");
   console.log(`Notion sync complete: ${pages.length} guides.`);
 }
