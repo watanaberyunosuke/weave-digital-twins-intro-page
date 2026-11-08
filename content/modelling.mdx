@@ -42,6 +42,16 @@ docker exec simulator python run_sim.py --reset-baseline
 
 Add `--dma ID` to scope a reset. This changes which history counts from now onward; it does not delete old residuals. A lasting change may be learned after the relearning period, so a cleared flag alone does not prove a physical issue was repaired.
 
+## Replay after an outage
+
+When the simulator was down, it replays the solves it missed, oldest first, in the idle part of each interval. Each replay is solved as of its own time: demand from the meters’ hour to that time, observed pressure from its 30 minutes and the baseline from earlier residuals. A time whose telemetry has not yet been backfilled waits for a later pass.
+
+```bash
+docker exec simulator python run_sim.py --replay
+```
+
+The console’s **Replay missed model solves** action runs the same pass on demand; a database lock allows one replay at a time. Past topology is not kept, so a replay solves the current `network.inp`. Nothing before that file was built is replayed, because the baseline then describes an earlier network. Replays never change current DMA status, and every replayed range is logged to `twin.backfill_log` and shaded on the DMA chart. Set `SIM_REPLAY=0` to keep gaps instead.
+
 ## Result retention
 
 Only the latest run is read for current per-element output. Historical `twin.sim_result` rows are pruned according to `SIM_RESULT_RETENTION_HOURS`. Residual history and per-element result history serve different purposes.

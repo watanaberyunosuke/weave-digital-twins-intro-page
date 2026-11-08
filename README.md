@@ -56,7 +56,7 @@ The browser check covers static routes, heading targets, search, clipboard, appe
 
 ## Content scope
 
-Technical content was checked against the twin repository on 2 November 2026. It identifies EPANET water modelling as the current implementation, keeps provenance explicit, and does not claim runtime health or validated field detection accuracy. No commands in the documentation are executed by this website.
+Technical content was checked against the twin repository on 8 November 2026. It identifies EPANET water modelling as the current implementation, keeps provenance explicit, and does not claim runtime health or validated field detection accuracy. No commands in the documentation are executed by this website.
 
 ## Brand
 
