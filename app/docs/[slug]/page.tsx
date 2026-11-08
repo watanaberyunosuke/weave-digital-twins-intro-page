@@ -1,6 +1,5 @@
 import { NotionContent } from "@/components/notion-content";
 import { DocsOutline } from "@/components/docs-outline";
-import { notionDocumentationUrl } from "@/components/docs-link";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { docs, repository } from "@/lib/docs";
@@ -40,15 +39,8 @@ export default async function DocPage({
         <p className="doc-description">{doc.description}</p>
         <div className="doc-meta">
           <span>GUIDE / {String(index + 1).padStart(2, "0")}</span>
-          <a
-            href={notionDocumentationUrl(slug)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View in Notion ↗
-          </a>
           <a href={`${repository}/blob/main/${doc.source}`}>
-            View primary source ↗
+            View source code ↗
           </a>
         </div>
         <details className="mobile-outline">

@@ -1,6 +1,7 @@
 "use client";
 import { Children, isValidElement, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Mermaid } from "@/components/mermaid";
 import { usePathname } from "next/navigation";
 
 type SearchPage = {
@@ -277,6 +278,17 @@ export function DocsNav({
     </>
   );
 }
+function nodeText(node: React.ReactNode): string {
+  return Children.toArray(node)
+    .map((child) =>
+      typeof child === "string" || typeof child === "number"
+        ? String(child)
+        : isValidElement<{ children?: React.ReactNode }>(child)
+          ? nodeText(child.props.children)
+          : "",
+    )
+    .join("");
+}
 export function CodeBlock({ children, ...props }: React.ComponentProps<"pre">) {
   const code = Children.toArray(children).find(isValidElement) as
     React.ReactElement<{ className?: string }> | undefined;
@@ -286,6 +298,7 @@ export function CodeBlock({ children, ...props }: React.ComponentProps<"pre">) {
     "text";
   const block = useRef<HTMLPreElement>(null);
   const [status, setStatus] = useState("Copy");
+  if (language === "mermaid") return <Mermaid chart={nodeText(children)} />;
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(block.current?.textContent || "");

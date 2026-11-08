@@ -6,16 +6,34 @@ The project name is `weave`. Keep active Docker bind mounts in a location that D
 
 ## Data flow
 
-```text
-Public GIS → raw assets → conformed assets → topology
-                                      ↓
-                        synthetic zones and registries
-                                      ↓
-Real feed adapters + Datagen → Kafka → Flink → twin telemetry
-                                                ↓
-PostGIS topology + meter demands → EPANET → residuals
-                                                ↓
-                              Console / GIS / ELK inspection
+```mermaid
+flowchart TD
+  subgraph S1[" "]
+    direction LR
+    A["Public GIS"] --> B["raw assets"] --> C["conformed assets"] --> D["topology"]
+  end
+  subgraph S2[" "]
+    direction LR
+    E["synthetic zones and registries"]
+  end
+  subgraph S3[" "]
+    direction LR
+    F["Real feed adapters + Datagen"] --> G["Kafka"] --> H["Flink"] --> I["twin telemetry"]
+  end
+  subgraph S4[" "]
+    direction LR
+    J["PostGIS topology + meter demands"] --> K["EPANET"] --> L["residuals"]
+  end
+  subgraph S5[" "]
+    direction LR
+    M["Console / GIS / ELK inspection"]
+  end
+  S1 --> S2 --> S3 --> S4 --> S5
+  style S1 fill:none,stroke:none
+  style S2 fill:none,stroke:none
+  style S3 fill:none,stroke:none
+  style S4 fill:none,stroke:none
+  style S5 fill:none,stroke:none
 ```
 
 Storage-level observations follow a separate batch path directly into Postgres; a daily reading does not require a Kafka stream.
