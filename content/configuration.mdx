@@ -6,16 +6,19 @@ Never commit deployment secrets. Use `.env.example` as the inventory of publishe
 
 ## Main settings
 
-| Setting                                | Purpose                                          |
-| -------------------------------------- | ------------------------------------------------ |
-| `GIS_REGION_CONFIG`                    | GIS catalogue, layers and extent                 |
-| `MARKET_DISPATCH_URL`, `MARKET_REGION` | Market adapter endpoint and region identifier    |
-| `HYDRO_URL`, `HYDRO_SITES`             | Hydrometry endpoint and selected gauges          |
-| `STORAGE_URL`, `STORAGE_BBOX`          | Storage endpoint and local extent filter         |
-| `CONSOLE_PORT`, `CONSOLE_BASEMAP`      | Local console port and optional starting basemap |
-| `SIM_MAX_PIPES`, `SIM_MAX_SNAP_M`      | Supplied subgraph cap and reservoir snap limit   |
-| `SIM_RESIDUAL_MIN_SAMPLES`             | Minimum residual baseline count                  |
-| `SIM_RESULT_RETENTION_HOURS`           | Per-element result retention                     |
+| Setting                                | Purpose                                                 |
+| -------------------------------------- | ------------------------------------------------------- |
+| `GIS_REGION_CONFIG`                    | GIS catalogue, layers and extent                        |
+| `MARKET_DISPATCH_URL`, `MARKET_REGION` | Market adapter endpoint and region identifier           |
+| `HYDRO_API`, `HYDRO_URL`               | Hydrometry adapter (`kiwis` or `hydstra`) and endpoint  |
+| `HYDRO_BBOX`, `HYDRO_SITES`            | Monitored area, or a list of sites                      |
+| `HYDRO_STALE_DAYS`, `HYDRO_INTERVAL_S` | Retired-site cut-off and poll interval                  |
+| `STORAGE_URL`, `STORAGE_BBOX`          | Storage endpoint and local extent filter                |
+| `CONSOLE_PORT`, `CONSOLE_BASEMAP`      | Local console port and optional starting basemap        |
+| `SIM_MAX_PIPES`, `SIM_MAX_SNAP_M`      | Supplied subgraph cap and reservoir snap limit          |
+| `SIM_RESIDUAL_MIN_SAMPLES`             | Minimum residual baseline count                         |
+| `SIM_RESULT_RETENTION_HOURS`           | Per-element result retention                            |
+| `SIM_REPLAY`                           | Replay missed solves after an outage (`0` to keep gaps) |
 
 Changing the model subgraph settings requires applying them to both the seeder and simulator, then reseeding and rebuilding. Reseeding replaces synthetic registries.
 

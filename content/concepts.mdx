@@ -4,11 +4,11 @@ Weave uses public GIS geometry for network assets. It derives graph nodes from p
 
 ## Three kinds of information
 
-| Category  | Examples                                        | Interpretation                                                 |
-| --------- | ----------------------------------------------- | -------------------------------------------------------------- |
-| Real      | Public pipes, facilities and gauge observations | Published source data, subject to source quality and licensing |
-| Synthetic | Derived DMAs, meters and generated readings     | Generated test data anchored to real geometry                  |
-| Modelled  | EPANET pressure and flow results                | A calculation under configured assumptions                     |
+| Category  | Examples                                                  | Interpretation                                                 |
+| --------- | --------------------------------------------------------- | -------------------------------------------------------------- |
+| Real      | Public pipes, facilities and monitoring site observations | Published source data, subject to source quality and licensing |
+| Synthetic | Derived DMAs, meters and generated readings               | Generated test data anchored to real geometry                  |
+| Modelled  | EPANET pressure and flow results                          | A calculation under configured assumptions                     |
 
 Telemetry messages and tables carry `is_synthetic`; real and synthetic telemetry is stored separately. Registry objects use a synthetic flag. A graph drawn over real geography does not make generated readings real.
 
@@ -18,7 +18,7 @@ A District Metered Area (DMA) groups pipes for analysis. Here, these zones are s
 
 ## Database organisation
 
-`asset` holds topology and derived DMAs. `ref` holds device and gauge registries. `twin` holds telemetry, model output and residuals. Postgres remains the system of record; Elasticsearch is a disposable inspection copy.
+`asset` holds topology and derived DMAs. `ref` holds device and monitoring site registries. `twin` holds telemetry, model output and residuals. Postgres remains the system of record; Elasticsearch is a disposable inspection copy.
 
 ## What an anomaly means
 

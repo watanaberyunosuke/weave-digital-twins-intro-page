@@ -4,22 +4,22 @@ The twin exposes an existing FastAPI console API. This website does not host or 
 
 ## Read interfaces
 
-| Route                                | Purpose                            |
-| ------------------------------------ | ---------------------------------- |
-| `GET /api/status`                    | Derived pipeline and service state |
-| `GET /api/config`                    | Console configuration              |
-| `GET /api/freshness`                 | Telemetry freshness information    |
-| `GET /api/feeds`                     | Feed information                   |
-| `GET /api/anomalies`                 | Flagged residuals                  |
-| `GET /api/geo/pipes`                 | Pipe map features                  |
-| `GET /api/geo/dmas`                  | DMA map features                   |
-| `GET /api/geo/facilities`            | Facility map features              |
-| `GET /api/geo/gauges`                | Hydrometry map features            |
-| `GET /api/geo/storages`              | Storage map features               |
-| `GET /api/geo/meters`                | Meter map features                 |
-| `GET /api/dma/{dma_id}`              | DMA detail                         |
-| `GET /api/device/{kind}/{device_id}` | Device detail                      |
-| `GET /api/storage/{station_no}`      | Storage history                    |
+| Route                                | Purpose                                           |
+| ------------------------------------ | ------------------------------------------------- |
+| `GET /api/status`                    | Derived pipeline and service state                |
+| `GET /api/config`                    | Console configuration                             |
+| `GET /api/freshness`                 | Telemetry freshness information                   |
+| `GET /api/feeds`                     | Latest monitoring site readings and recent series |
+| `GET /api/anomalies`                 | Flagged residuals                                 |
+| `GET /api/geo/pipes`                 | Pipe map features                                 |
+| `GET /api/geo/dmas`                  | DMA map features                                  |
+| `GET /api/geo/facilities`            | Facility map features                             |
+| `GET /api/geo/gauges`                | Monitoring site map features                      |
+| `GET /api/geo/storages`              | Storage map features                              |
+| `GET /api/geo/meters`                | Meter map features                                |
+| `GET /api/dma/{dma_id}`              | DMA detail                                        |
+| `GET /api/device/{kind}/{device_id}` | Device detail                                     |
+| `GET /api/storage/{station_no}`      | Storage history                                   |
 
 Geospatial endpoints can apply source-defined bounds, limits or role filtering. Do not treat a map response as an exhaustive export without checking the contract.
 

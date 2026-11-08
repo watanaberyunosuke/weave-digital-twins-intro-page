@@ -2,6 +2,10 @@
 
 Open `http://localhost:8090` after starting the admin console. Inspect the pipeline stages, topology map, telemetry freshness, real feeds and residual flags. Operation previews show the command that will run; one operation is allowed at a time.
 
+The Telemetry tab lists water level and flow **monitoring sites** in a filterable table, with level and flow charts for the selected site covering the 24 hours before its latest reading. They are called monitoring sites rather than gauges because an area includes retarding basins, drains and channel offtakes as well as river gauging stations. The map draws the same sites.
+
+The tools list includes **Fill telemetry gaps** and **Replay missed model solves**. Both run automatically as well; the buttons catch up at once. They are admin actions; demo users get a simulated run.
+
 The console holds the Docker socket. Keep its loopback binding, host validation and required POST header. The public project website does not relay administrative commands.
 
 ## Public console roles

@@ -15,6 +15,10 @@ Run `scripts/fetch-confluent-stack.sh` from the twin repository. The base file i
 
 Confirm topics exist, seeding completed, `schemas/*.avsc` was generated, and Datagen connectors are running. Then check that the Flink statement set is running and that sink timestamps advance. Avoid starting a second statement set.
 
+## Gaps after the host slept
+
+Synthetic gaps fill once live readings resume, and missed solves replay after that; see [Telemetry and pipelines](/docs/telemetry/) and [Hydraulic modelling](/docs/modelling/). Check `twin.backfill_log` for what was filled. A gap still open has no live readings after it yet, so check the generators and Flink before expecting a fill.
+
 ## No model or residual
 
 Review reservoir classification, snap distance, topology node references and supplied connectivity. Build the network after topology changes. Confirm readings exist before expecting non-zero demand. A fresh baseline remains UNKNOWN until enough prior residuals exist.
@@ -25,7 +29,7 @@ Review reservoir classification, snap distance, topology node references and sup
 ./scripts/elk-up.sh
 ```
 
-Use this supported entry point to select local or external ELK. It probes from the intended container network. Authentication and certificate failures require correction. Logstash resets saved positions when its target changes so the new cluster receives the bounded backfill.
+Use this supported entry point to select local or external ELK. It probes from the intended container network. Authentication and certificate failures require correction. Logstash resets saved positions when its target changes so the new cluster receives the bounded backfill. Every input reads in pages, so a multi-day fill does not exhaust its memory. Hydrometry is read forward on `ingested_at`, because a reading’s own time can be a day or more behind rows already read.
 
 Check Postgres first: Elasticsearch is only a derived copy. Its retention does not describe the full Postgres history.
 
