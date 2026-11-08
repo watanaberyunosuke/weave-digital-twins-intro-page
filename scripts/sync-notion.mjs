@@ -83,6 +83,23 @@ export function inlineNotionTags(markdown) {
     .join("");
 }
 
+// Each Notion page ends with a "Guide navigation" section linking back to
+// Notion. The site has its own navigation, so the section is dropped up to the
+// next heading of the same or higher level, or the end of the page.
+export function dropGuideNavigation(markdown) {
+  const lines = markdown.split("\n");
+  const out = [];
+  let skipping = false;
+  let fenced = false;
+  for (const line of lines) {
+    if (/^```/.test(line)) fenced = !fenced;
+    if (!fenced && /^#{1,2}\s/.test(line))
+      skipping = /^##\s+Guide navigation\s*$/i.test(line);
+    if (!skipping) out.push(line);
+  }
+  return out.join("\n").replace(/\n+$/, "\n");
+}
+
 const token = process.env.NOTION_ACCESS_TOKEN;
 // Production builds must publish Notion, the source of the guides, so a missing
 // token or a failed fetch fails the deploy and the last good one stays live.
@@ -149,7 +166,7 @@ if (!token) {
         throw new Error(
           `Notion returned incomplete content for ${slug}; refusing to publish.`,
         );
-      let markdown = inlineNotionTags(data.markdown);
+      let markdown = dropGuideNavigation(inlineNotionTags(data.markdown));
       // Preserve links to our own guides as links inside the website.
       markdown = markdown.replace(
         /\[([^\]]+)\]\((https:\/\/[^)]+)\)/g,
