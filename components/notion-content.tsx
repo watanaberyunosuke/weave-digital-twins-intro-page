@@ -1,4 +1,4 @@
-import ReactMarkdown from "react-markdown";
+import { MarkdownAsync } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypePrettyCode from "rehype-pretty-code";
 import { CodeBlock } from "@/components/controls";
@@ -14,9 +14,11 @@ function headingText(children: ReactNode): string {
     )
     .join("");
 }
-export function NotionContent({ markdown }: { markdown: string }) {
+// rehype-pretty-code highlights asynchronously, which the synchronous renderer
+// can't run, so this renders on the server with the async one.
+export async function NotionContent({ markdown }: { markdown: string }) {
   return (
-    <ReactMarkdown
+    <MarkdownAsync
       skipHtml
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[
@@ -57,6 +59,6 @@ export function NotionContent({ markdown }: { markdown: string }) {
       }}
     >
       {markdown}
-    </ReactMarkdown>
+    </MarkdownAsync>
   );
 }
