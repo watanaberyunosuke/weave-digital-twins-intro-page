@@ -3,6 +3,7 @@ import { Brand } from "@/components/brand";
 import { SiteHeader } from "@/components/site-header";
 import { docs } from "@/lib/docs";
 import { DocsLink } from "@/components/docs-link";
+import { Analytics } from "@vercel/analytics/next";
 const repository = "https://github.com/watanaberyunosuke/weave-digital-twins";
 import "./globals.css";
 export const metadata: Metadata = {
@@ -58,6 +59,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <p>Project documentation · No connection to a running twin</p>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
