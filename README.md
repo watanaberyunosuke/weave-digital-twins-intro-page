@@ -2,7 +2,7 @@
 
 A static Next.js and TypeScript website with a documentation layout inspired by [MaaFramework’s quick-start guide](https://maafw.com/docs/1.1-QuickStarted/): a persistent grouped sidebar, focused reading column, active page outline, searchable content, highlighted code, callouts and previous/next navigation.
 
-The website documentation is the primary reader experience. The separately published [Notion documentation](https://harrybwatson.notion.site/Weave-documentation-40c6e7f930a481d3a1c5d397aa1a49b8) remains available as a secondary copy, linked from the header and individual guides. No automatic synchronisation is configured.
+The website documentation is the primary reader experience. The separately published [Notion documentation](https://harrybwatson.notion.site/Weave-documentation-40c6e7f930a481d3a1c5d397aa1a49b8) remains available as a secondary copy, linked from individual guides. Production builds on Vercel fetch the guides from Notion (see Notion sync below).
 
 ## Run locally
 
@@ -37,7 +37,15 @@ Open http://127.0.0.1:8080/docs/getting-started/. Deploy the contents of `out/` 
 
 Search runs locally over actual guide text and headings. Syntax highlighting is generated during the build with Shiki through rehype-pretty-code. Mobile layouts use collapsible documentation navigation and a page outline. Appearance supports Auto, Light and Dark using the existing browser preference.
 
-Earlier standalone and documentation layouts are retained locally in the ignored `archive/` directory. The published Notion pages are unchanged by the website layout update. Keep future edits aligned deliberately; neither copy updates the other automatically.
+Earlier standalone and documentation layouts are retained locally in the ignored `archive/` directory.
+
+## Notion sync
+
+`npm run build` runs `scripts/sync-notion.mjs` first. With `NOTION_ACCESS_TOKEN` set, it fetches every guide listed in `lib/external-docs.json` and the site renders that text instead of `content/*.mdx`; without it, the sync is skipped and the repository copy is used.
+
+- Production (`VERCEL_ENV=production`) requires the sync: a missing token, a failed fetch or content the site can't render fails the build, so the previous deployment stays live rather than publishing stale text.
+- The token is set for Production only, so preview builds use `content/*.mdx`. Keep those files aligned with Notion so previews stay representative.
+- `REQUIRE_NOTION_SYNC=1` requires the sync on any build; `REQUIRE_NOTION_SYNC=0` lets a production build fall back to the repository copy, for example while Notion is unavailable.
 
 ## Checks
 

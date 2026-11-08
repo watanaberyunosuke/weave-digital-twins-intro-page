@@ -5,7 +5,14 @@ import remarkGfm from "remark-gfm";
 import { visit } from "unist-util-visit";
 
 const token = process.env.NOTION_ACCESS_TOKEN;
-const required = process.env.REQUIRE_NOTION_SYNC === "1";
+// Production builds must publish Notion, the source of the guides, so a missing
+// token or a failed fetch fails the deploy and the last good one stays live.
+// Previews have no token and build from content/*.mdx. REQUIRE_NOTION_SYNC=1
+// forces the sync on any build; =0 lets production fall back while Notion is down.
+const required =
+  process.env.REQUIRE_NOTION_SYNC === "1" ||
+  (process.env.VERCEL_ENV === "production" &&
+    process.env.REQUIRE_NOTION_SYNC !== "0");
 const destination = new URL(
   "../lib/notion-content.generated.json",
   import.meta.url,
@@ -13,7 +20,7 @@ const destination = new URL(
 if (!token) {
   if (required)
     throw new Error(
-      "REQUIRE_NOTION_SYNC=1 but NOTION_ACCESS_TOKEN is missing.",
+      "Notion sync is required for this build (production, or REQUIRE_NOTION_SYNC=1) but NOTION_ACCESS_TOKEN is missing.",
     );
   await writeFile(destination, "{}\n");
   console.warn(
