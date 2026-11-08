@@ -43,12 +43,14 @@ export function inlineNotionTags(markdown) {
             .replace(/<s>([\s\S]*?)<\/s>/g, "~~$1~~")
             .replace(/<u>([\s\S]*?)<\/u>/g, "$1")
             .replace(
-              /<mention(?:-page)?\s+url="([^"]+)"\s*>([\s\S]*?)<\/mention(?:-page)?>/g,
+              /<mention(?:-[a-z]+)?\s+url="([^"]+)"\s*>([\s\S]*?)<\/mention(?:-[a-z]+)?>/g,
               "[$2]($1)",
             )
-            .replace(/<mention(?:-page)?\s+url="([^"]+)"\s*\/>/g, "[$1]($1)")
-            .replace(/<date\s+start="(\d{4}-\d{2}-\d{2})"[^>]*\/>/g, (_, d) =>
-              date(d),
+            .replace(/<mention(?:-[a-z]+)?\s+url="([^"]+)"\s*\/>/g, "[$1]($1)")
+            .replace(
+              /<(?:mention-)?date\s+start="(\d{4}-\d{2}-\d{2})"(?:\s+end="(\d{4}-\d{2}-\d{2})")?[^>]*\/>/g,
+              (_, start, end) =>
+                end ? `${date(start)} to ${date(end)}` : date(start),
             ),
     )
     .join("");
