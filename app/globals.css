@@ -2353,3 +2353,152 @@ body {
   max-width: 100%;
   height: auto;
 }
+
+/* Sidebar icons and collapse (HDH-209) */
+.nav-group a,
+.docs-home {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-icon {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sidebar-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.docs-sidebar .sidebar-head > .eyebrow {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+.sidebar-toggle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.sidebar-toggle:hover {
+  background: var(--panel-2);
+  color: var(--ink);
+}
+.sidebar-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sidebar-spacer,
+.sidebar-edge {
+  display: none;
+}
+@media (min-width: 768px) {
+  .docs-shell[data-mode="auto"] {
+    grid-template-columns: 0 minmax(0, 1fr) 240px;
+  }
+  .docs-shell[data-mode="auto"] .sidebar-spacer {
+    display: block;
+  }
+  .docs-shell[data-mode="auto"] .docs-sidebar {
+    position: fixed;
+    left: 0;
+    width: 272px;
+    z-index: 30;
+    border-right: 1px solid var(--line);
+    box-shadow: 8px 0 32px rgb(0 0 0 / 0.25);
+    transition:
+      transform 0.2s ease,
+      visibility 0s;
+  }
+  .docs-shell[data-mode="auto"][data-hidden="true"] .docs-sidebar {
+    transform: translateX(-100%);
+    visibility: hidden;
+    box-shadow: none;
+    transition:
+      transform 0.2s ease,
+      visibility 0s 0.2s;
+  }
+  .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    position: fixed;
+    top: var(--header-h);
+    left: 0;
+    bottom: 0;
+    width: 28px;
+    z-index: 29;
+    padding: 0;
+    border: 0;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: e-resize;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      width 0.15s ease;
+  }
+  .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: edge-nudge 2s ease-in-out infinite;
+  }
+  .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge span {
+    writing-mode: vertical-rl;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge:hover,
+  .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge:focus-visible {
+    background: var(--panel-2);
+    color: var(--accent);
+    width: 34px;
+  }
+}
+@keyframes edge-nudge {
+  50% {
+    transform: translateX(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-edge svg {
+    animation: none !important;
+  }
+}
+@media (min-width: 768px) and (max-width: 1279px) {
+  .docs-shell[data-mode="auto"] {
+    grid-template-columns: 0 minmax(0, 1fr);
+  }
+}
