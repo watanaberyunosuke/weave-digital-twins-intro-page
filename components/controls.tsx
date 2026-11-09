@@ -397,7 +397,12 @@ export function DocsShell({
         onFocus={show}
         onClick={show}
         tabIndex={hidden ? 0 : -1}
-      />
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m9 5 7 7-7 7" />
+        </svg>
+        <span>Menu</span>
+      </button>
       <details className="mobile-docs">
         <summary>Documentation navigation</summary>
         <nav aria-label="Mobile documentation">

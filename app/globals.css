@@ -2441,22 +2441,60 @@ body {
       visibility 0s 0.2s;
   }
   .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
     position: fixed;
     top: var(--header-h);
     left: 0;
     bottom: 0;
-    width: 14px;
+    width: 28px;
     z-index: 29;
     padding: 0;
     border: 0;
-    border-right: 2px solid var(--line);
-    background: transparent;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
     cursor: e-resize;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      width 0.15s ease;
+  }
+  .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: edge-nudge 2s ease-in-out infinite;
+  }
+  .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge span {
+    writing-mode: vertical-rl;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
   .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge:hover,
   .docs-shell[data-mode="auto"][data-hidden="true"] .sidebar-edge:focus-visible {
-    border-right-color: var(--accent);
+    background: var(--panel-2);
+    color: var(--accent);
+    width: 34px;
+  }
+}
+@keyframes edge-nudge {
+  50% {
+    transform: translateX(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-edge svg {
+    animation: none !important;
   }
 }
 @media (min-width: 768px) and (max-width: 1279px) {
