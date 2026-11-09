@@ -380,9 +380,19 @@ export function DocsShell({
             title={auto ? "Pin sidebar open" : "Auto-hide sidebar"}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 16v6" />
-              <path d="M9 3h6l-1 5.5L17.5 12h-11L10 8.5 9 3Z" />
-              {auto ? <path d="m4 20 16-16" /> : null}
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              {auto ? (
+                <path d="M9 4v16" strokeDasharray="2.5 2.5" />
+              ) : (
+                <>
+                  <path d="M9 4v16" />
+                  <path
+                    d="M5 4h4v16H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                </>
+              )}
             </svg>
           </button>
         </div>
