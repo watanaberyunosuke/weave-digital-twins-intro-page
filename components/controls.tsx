@@ -301,6 +301,10 @@ function NavIcon({ name }: { name: string }) {
     </svg>
   );
 }
+type SidebarMode = "pinned" | "auto";
+const sidebarKey = "weave-docs-sidebar";
+const autoHideDelay = 3000;
+const leaveDelay = 600;
 export function DocsShell({
   pages,
   children,
@@ -308,49 +312,92 @@ export function DocsShell({
   pages: { slug: string; title: string; group: string }[];
   children: React.ReactNode;
 }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [mode, setMode] = useState<SidebarMode>("pinned");
+  const [peek, setPeek] = useState(true);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aside = useRef<HTMLElement>(null);
+  const clear = () => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+  };
+  const hideLater = (delay: number) => {
+    clear();
+    timer.current = setTimeout(() => setPeek(false), delay);
+  };
   useEffect(() => {
     try {
-      if (localStorage.getItem("weave-docs-sidebar") === "collapsed")
-        setCollapsed(true);
+      if (localStorage.getItem(sidebarKey) === "pinned") return;
     } catch {}
+    setMode("auto");
   }, []);
+  useEffect(() => {
+    clear();
+    if (mode === "auto") {
+      setPeek(true);
+      hideLater(autoHideDelay);
+    }
+    return clear;
+  }, [mode]);
   const toggle = () => {
-    setCollapsed((value) => {
-      try {
-        localStorage.setItem(
-          "weave-docs-sidebar",
-          value ? "expanded" : "collapsed",
-        );
-      } catch {}
-      return !value;
-    });
+    const next: SidebarMode = mode === "pinned" ? "auto" : "pinned";
+    try {
+      localStorage.setItem(sidebarKey, next);
+    } catch {}
+    setMode(next);
   };
+  const show = () => {
+    clear();
+    setPeek(true);
+  };
+  const auto = mode === "auto";
+  const hidden = auto && !peek;
   return (
-    <div className="docs-shell" data-collapsed={collapsed}>
-      <aside className="docs-sidebar" aria-label="Documentation navigation">
+    <div className="docs-shell" data-mode={mode} data-hidden={hidden}>
+      <aside
+        ref={aside}
+        className="docs-sidebar"
+        aria-label="Documentation navigation"
+        onMouseEnter={auto ? show : undefined}
+        onMouseLeave={auto ? () => hideLater(leaveDelay) : undefined}
+        onFocus={auto ? show : undefined}
+        onBlur={
+          auto
+            ? (event) => {
+                if (!aside.current?.contains(event.relatedTarget as Node))
+                  hideLater(leaveDelay);
+              }
+            : undefined
+        }
+      >
         <div className="sidebar-head">
           <p className="eyebrow">WEAVE / DOCUMENTATION</p>
           <button
             type="button"
             className="sidebar-toggle"
             onClick={toggle}
-            aria-expanded={!collapsed}
-            aria-controls="docs-sidebar-nav"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-pressed={!auto}
+            aria-label={auto ? "Pin sidebar open" : "Auto-hide sidebar"}
+            title={auto ? "Pin sidebar open" : "Auto-hide sidebar"}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="3" y="4" width="18" height="16" rx="2" />
-              <path d="M9 4v16" />
-              <path d={collapsed ? "m14 10 2 2-2 2" : "m16 10-2 2 2 2"} />
+              <path d="M12 16v6" />
+              <path d="M9 3h6l-1 5.5L17.5 12h-11L10 8.5 9 3Z" />
+              {auto ? <path d="m4 20 16-16" /> : null}
             </svg>
           </button>
         </div>
-        <div id="docs-sidebar-nav">
-          <DocsNav pages={pages} collapsed={collapsed} />
-        </div>
+        <DocsNav pages={pages} />
       </aside>
+      <div className="sidebar-spacer" aria-hidden="true" />
+      <button
+        type="button"
+        className="sidebar-edge"
+        aria-label="Show documentation navigation"
+        onMouseEnter={show}
+        onFocus={show}
+        onClick={show}
+        tabIndex={hidden ? 0 : -1}
+      />
       <details className="mobile-docs">
         <summary>Documentation navigation</summary>
         <nav aria-label="Mobile documentation">
@@ -363,10 +410,8 @@ export function DocsShell({
 }
 export function DocsNav({
   pages,
-  collapsed = false,
 }: {
   pages: { slug: string; title: string; group: string }[];
-  collapsed?: boolean;
 }) {
   const pathname = usePathname();
   const closeMobile = (event: React.MouseEvent<HTMLElement>) =>
@@ -382,7 +427,6 @@ export function DocsNav({
             className={active ? "active" : ""}
             aria-current={active ? "page" : undefined}
             href={`/docs/${page.slug}/`}
-            title={collapsed ? page.title : undefined}
             onClick={closeMobile}
           >
             <NavIcon name={page.slug} />
@@ -395,7 +439,6 @@ export function DocsNav({
       <Link
         className={`docs-home ${pathname === "/docs/" || pathname === "/docs" ? "active" : ""}`}
         href="/docs/"
-        title={collapsed ? "Documentation overview" : undefined}
         onClick={closeMobile}
       >
         <NavIcon name="home" />
@@ -403,14 +446,10 @@ export function DocsNav({
       </Link>
       {Array.from(new Set(pages.map((page) => page.group))).map((group) => (
         <div className="nav-group" key={group}>
-          {collapsed ? (
-            <div className="sidebar-section">{links(group)}</div>
-          ) : (
-            <details open className="sidebar-section">
-              <summary>{group}</summary>
-              {links(group)}
-            </details>
-          )}
+          <details open className="sidebar-section">
+            <summary>{group}</summary>
+            {links(group)}
+          </details>
         </div>
       ))}
     </>
