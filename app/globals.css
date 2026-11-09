@@ -2353,3 +2353,93 @@ body {
   max-width: 100%;
   height: auto;
 }
+
+/* Sidebar icons and collapse (HDH-209) */
+.nav-group a,
+.docs-home {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-icon {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sidebar-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.docs-sidebar .sidebar-head > .eyebrow {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+.sidebar-toggle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.sidebar-toggle:hover {
+  background: var(--panel-2);
+  color: var(--ink);
+}
+.sidebar-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (min-width: 768px) {
+  .docs-shell[data-collapsed="true"] {
+    grid-template-columns: 60px minmax(0, 1fr) 240px;
+  }
+  .docs-shell[data-collapsed="true"] .docs-sidebar {
+    padding-inline: 10px;
+    overflow-x: hidden;
+  }
+  .docs-shell[data-collapsed="true"] .sidebar-head {
+    justify-content: center;
+  }
+  .docs-shell[data-collapsed="true"] .sidebar-head > .eyebrow,
+  .docs-shell[data-collapsed="true"] .docs-sidebar .nav-label {
+    display: none;
+  }
+  .docs-shell[data-collapsed="true"] .docs-sidebar .nav-group a,
+  .docs-shell[data-collapsed="true"] .docs-sidebar .docs-home {
+    justify-content: center;
+    margin-left: 0;
+    padding-inline: 0;
+    border-left: 0;
+  }
+  .docs-shell[data-collapsed="true"] .docs-sidebar .nav-group {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+}
+@media (min-width: 768px) and (max-width: 1279px) {
+  .docs-shell[data-collapsed="true"] {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+}

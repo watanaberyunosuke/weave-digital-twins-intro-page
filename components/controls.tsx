@@ -228,51 +228,189 @@ export function Search({ pages }: { pages: SearchPage[] }) {
     </>
   );
 }
-export function DocsNav({
+const navIcons: Record<string, React.ReactNode> = {
+  home: (
+    <>
+      <path d="m3 11 9-8 9 8" />
+      <path d="M5 10v10h14V10" />
+    </>
+  ),
+  "getting-started": (
+    <>
+      <path d="M5 21V4" />
+      <path d="M5 4h12l-2 4 2 4H5" />
+    </>
+  ),
+  concepts: (
+    <>
+      <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+      <path d="m3 13 9 5 9-5" />
+    </>
+  ),
+  architecture: (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="8.5" y="14" width="7" height="7" rx="1" />
+      <path d="M6.5 10v2h11v-2M12 12v2" />
+    </>
+  ),
+  modelling: <path d="M3 12h4l3-8 4 16 3-8h4" />,
+  configuration: (
+    <>
+      <path d="M4 7h10m4 0h2M4 17h2m4 0h10" />
+      <circle cx="16" cy="7" r="2" />
+      <circle cx="8" cy="17" r="2" />
+    </>
+  ),
+  regions: (
+    <>
+      <path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </>
+  ),
+  telemetry: (
+    <>
+      <circle cx="12" cy="12" r="2" />
+      <path d="M7.8 7.8a6 6 0 0 0 0 8.4m8.4-8.4a6 6 0 0 1 0 8.4M4.9 4.9a10 10 0 0 0 0 14.2m14.2-14.2a10 10 0 0 1 0 14.2" />
+    </>
+  ),
+  "console-and-gis": (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+    </>
+  ),
+  operations: (
+    <path d="M14.7 6.3a4 4 0 0 0-5 5L3 18l3 3 6.7-6.7a4 4 0 0 0 5-5l-2.4 2.4-2.6-.6-.6-2.6 2.6-2.2Z" />
+  ),
+  api: <path d="m8 7-5 5 5 5m8-10 5 5-5 5M14 4l-4 16" />,
+  contributing: (
+    <>
+      <circle cx="6" cy="5" r="2" />
+      <circle cx="6" cy="19" r="2" />
+      <circle cx="18" cy="9" r="2" />
+      <path d="M6 7v10M18 11c0 4-12 2-12 6" />
+    </>
+  ),
+};
+function NavIcon({ name }: { name: string }) {
+  return (
+    <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+      {navIcons[name] ?? <circle cx="12" cy="12" r="3" />}
+    </svg>
+  );
+}
+export function DocsShell({
   pages,
+  children,
 }: {
   pages: { slug: string; title: string; group: string }[];
+  children: React.ReactNode;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("weave-docs-sidebar") === "collapsed")
+        setCollapsed(true);
+    } catch {}
+  }, []);
+  const toggle = () => {
+    setCollapsed((value) => {
+      try {
+        localStorage.setItem(
+          "weave-docs-sidebar",
+          value ? "expanded" : "collapsed",
+        );
+      } catch {}
+      return !value;
+    });
+  };
+  return (
+    <div className="docs-shell" data-collapsed={collapsed}>
+      <aside className="docs-sidebar" aria-label="Documentation navigation">
+        <div className="sidebar-head">
+          <p className="eyebrow">WEAVE / DOCUMENTATION</p>
+          <button
+            type="button"
+            className="sidebar-toggle"
+            onClick={toggle}
+            aria-expanded={!collapsed}
+            aria-controls="docs-sidebar-nav"
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M9 4v16" />
+              <path d={collapsed ? "m14 10 2 2-2 2" : "m16 10-2 2 2 2"} />
+            </svg>
+          </button>
+        </div>
+        <div id="docs-sidebar-nav">
+          <DocsNav pages={pages} collapsed={collapsed} />
+        </div>
+      </aside>
+      <details className="mobile-docs">
+        <summary>Documentation navigation</summary>
+        <nav aria-label="Mobile documentation">
+          <DocsNav pages={pages} />
+        </nav>
+      </details>
+      {children}
+    </div>
+  );
+}
+export function DocsNav({
+  pages,
+  collapsed = false,
+}: {
+  pages: { slug: string; title: string; group: string }[];
+  collapsed?: boolean;
 }) {
   const pathname = usePathname();
+  const closeMobile = (event: React.MouseEvent<HTMLElement>) =>
+    event.currentTarget.closest("details.mobile-docs")?.removeAttribute("open");
+  const links = (group: string) =>
+    pages
+      .filter((page) => page.group === group)
+      .map((page) => {
+        const active = pathname.replace(/\/$/, "") === `/docs/${page.slug}`;
+        return (
+          <Link
+            key={page.slug}
+            className={active ? "active" : ""}
+            aria-current={active ? "page" : undefined}
+            href={`/docs/${page.slug}/`}
+            title={collapsed ? page.title : undefined}
+            onClick={closeMobile}
+          >
+            <NavIcon name={page.slug} />
+            <span className="nav-label">{page.title}</span>
+          </Link>
+        );
+      });
   return (
     <>
       <Link
         className={`docs-home ${pathname === "/docs/" || pathname === "/docs" ? "active" : ""}`}
         href="/docs/"
-        onClick={(event) =>
-          event.currentTarget
-            .closest("details.mobile-docs")
-            ?.removeAttribute("open")
-        }
+        title={collapsed ? "Documentation overview" : undefined}
+        onClick={closeMobile}
       >
-        Documentation overview
+        <NavIcon name="home" />
+        <span className="nav-label">Documentation overview</span>
       </Link>
       {Array.from(new Set(pages.map((page) => page.group))).map((group) => (
         <div className="nav-group" key={group}>
-          <details open className="sidebar-section">
-            <summary>{group}</summary>
-            {pages
-              .filter((page) => page.group === group)
-              .map((page) => {
-                const active =
-                  pathname.replace(/\/$/, "") === `/docs/${page.slug}`;
-                return (
-                  <Link
-                    key={page.slug}
-                    className={active ? "active" : ""}
-                    aria-current={active ? "page" : undefined}
-                    href={`/docs/${page.slug}/`}
-                    onClick={(event) =>
-                      event.currentTarget
-                        .closest("details.mobile-docs")
-                        ?.removeAttribute("open")
-                    }
-                  >
-                    {page.title}
-                  </Link>
-                );
-              })}
-          </details>
+          {collapsed ? (
+            <div className="sidebar-section">{links(group)}</div>
+          ) : (
+            <details open className="sidebar-section">
+              <summary>{group}</summary>
+              {links(group)}
+            </details>
+          )}
         </div>
       ))}
     </>
