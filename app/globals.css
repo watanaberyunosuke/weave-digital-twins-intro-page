@@ -185,7 +185,6 @@ h3 {
   background: var(--bg);
 }
 .header-inner {
-  max-width: 1600px;
   padding: 0 var(--header-pad);
   margin: auto;
   height: var(--header-h);
@@ -1530,7 +1529,7 @@ h3 {
 .docs-shell {
   background: var(--bg);
   color: var(--ink);
-  max-width: 1600px;
+  max-width: none;
   grid-template-columns: 272px minmax(0, 1fr) 240px;
 }
 .docs-sidebar {
@@ -1825,11 +1824,6 @@ h3 {
 }
 .docs-index-group > h2 {
   font-size: 23px;
-}
-@media (min-width: 1600px) {
-  .docs-shell {
-    border-inline: 1px solid var(--line);
-  }
 }
 @media (max-width: 1279px) {
   .docs-shell {
